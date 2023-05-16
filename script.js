@@ -1,3 +1,4 @@
+
 let apiKey = "6379130c30bb5a7ca87ece7f3f76d3da";
 let apiMoviesUrl = `https://api.themoviedb.org/3/trending/all/week?api_key=${apiKey}`;
 let apiMovieGenreUrl = `https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}&language=en-US`;
@@ -17,7 +18,11 @@ let searchQuery;
 // Get Data
 async function getApiData(pageNo = 1, apiUrl) {
     try {
-        data = await fetch(`${apiUrl}&page=${pageNo}`).then((response) => { return response.json() });
+        if (pageNo) {
+            data = await fetch(`${apiUrl}&page=${pageNo}`).then((response) => { return response.json() });
+        } else {
+            data = await fetch(apiUrl).then((response) => { return response.json() });
+        }
         return data;
 
     } catch (error) {
@@ -46,7 +51,6 @@ const appendMovie = (movieData, search = false) => {
         movieBox.appendChild(movieImg);
         moviesHolder.appendChild(colDiv);
     });
-    // console.log(data)
     pageNo++;
 
 }
@@ -209,3 +213,78 @@ window.onload = function () {
         appendMovie(data);
     });
 }
+
+
+
+
+
+
+// Watchlist
+let watchlist = [
+    {
+        id: 868759,
+        watched: false,
+        delete: false,
+        type: "movie"
+    },
+    {
+        id: 804150,
+        watched: false,
+        delete: false,
+        type: "movie"
+    },
+    {
+        id: 76331,
+        watched: false,
+        delete: false,
+        type: "tv"
+    }
+];
+let getApiUrl;
+let findType;
+
+let watchlistBtn = document.querySelector(".watchlist");
+let watchlistBox = document.querySelector(".movie-list .row");
+localStorage.setItem("watchlist", JSON.stringify(watchlist));
+let getList = JSON.parse(localStorage.getItem("watchlist"));
+
+watchlist.forEach((item) => {
+    if (item.type == "movie") {
+        findType = "movie";
+    } else {
+        findType = "tv";
+    }
+
+    let getApiUrl = `https://api.themoviedb.org/3/${findType}/${item.id}?api_key=${apiKey}&language=en-US`;
+
+    getApiData(undefined, getApiUrl).then((data) => {
+        let colDiv = document.createElement("div");
+        colDiv.setAttribute("class", "col-md-2");
+        watchlistBox.appendChild(colDiv);
+        colDiv.innerHTML = `
+            <div class="watch-movie">
+                <div class="w-movie-det">
+                    <div class="w-movie-img">
+                        <img src="http://image.tmdb.org/t/p/w500/${data.poster_path}" alt="">
+                    </div>
+                    <div class="w-movie-name">
+                        <div class="w-head">${data.title || data.name}</div>
+                    </div>
+                </div>
+                <div class="w-movie-btns">
+                    <select class="form-select" aria-label="Default select example">
+                        <option selected>Unwatched</option>
+                        <option value="1">Watched</option>
+                    </select>
+                    <div class="delete-btn">
+                        <i class="fa-solid fa-trash"></i>
+                    </div>
+                </div>
+            </div>
+        `;
+
+
+
+    });
+
+});

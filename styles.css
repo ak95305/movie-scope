@@ -17,7 +17,19 @@ nav {
     width: 100%;
 }
 
-.movie-app{
+select,
+select:hover,
+select:focus {
+    box-shadow: none !important;
+}
+
+ul,
+li {
+    list-style: none;
+    padding: 0;
+}
+
+.movie-app {
     padding-top: 82px;
 }
 
@@ -164,8 +176,71 @@ li:not(:last-child)::after {
     display: none;
 }
 
+.watchlist-box {
+    width: 90%;
+    padding: 20px;
+    background-color: #fff;
+    margin: auto;
+    box-shadow: 0 0 20px 0 #33333345;
+    position: relative;
+    max-height: 500px;
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    height: 500px;
+    overflow-x: auto;
+}
+
+.w-movie-img {
+    width: 100%;
+}
+
+.w-head {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 5px;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.watchlist-box .movie-list {
+    margin-top: 20px;
+}
+
+.watch-head {
+    font-size: 25px;
+    font-weight: 600;
+}
+
+.w-movie-btns {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.w-movie-btns select {
+    font-size: 10px;
+}
+
+.w-movie-btns .delete-btn {
+    flex-basis: 20%;
+    font-size: 12px;
+}
+
+.watch-movie {
+    border: 1px solid #333;
+    padding: 5px;
+}
+
 @media (max-width: 767px) {
-    .movie-modal{
+    .movie-modal {
         padding: 40px 20px;
         overflow-x: auto;
         width: 90%;
