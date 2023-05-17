@@ -314,6 +314,7 @@ const getWatchValue = (id) => {
             item.watched = true;
         }
     });
+    localStorage.setItem("watchlist", JSON.stringify(getList));
 }
 
 
