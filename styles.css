@@ -266,4 +266,7 @@ li:not(:last-child)::after {
     .movie-app{
         padding-top: 140px;
     }
+    .watchlist-box, .movie-modal{
+        height: 90vh;
+    }
 }
