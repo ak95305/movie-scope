@@ -330,7 +330,7 @@ const addMovieWatchlist = (id, type) => {
             return;
         }
     });
-
+    
     if (!alreadyThere) {
         if (type == "movie") {
             findType = "movie";
@@ -349,10 +349,10 @@ const addMovieWatchlist = (id, type) => {
                     type: findType
                 }
                 getList = [...getList, watchlistMovie];
+                localStorage.setItem("watchlist", JSON.stringify(getList));
             });
         }
     }
-    
     
     
     localStorage.setItem("watchlist", JSON.stringify(getList));
