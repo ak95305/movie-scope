@@ -239,24 +239,7 @@ window.onload = function () {
 
 // intial watchlist
 let watchlist = [
-    {
-        id: 868759,
-        watched: false,
-        deleted: false,
-        type: "movie"
-    },
-    {
-        id: 804150,
-        watched: true,
-        deleted: false,
-        type: "movie"
-    },
-    {
-        id: 76331,
-        watched: false,
-        deleted: false,
-        type: "tv"
-    }
+    
 ];
 
 
