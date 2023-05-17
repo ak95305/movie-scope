@@ -307,6 +307,15 @@ const delMovie = (id) => {
     appendWatchList();
 }
 
+// Watchlist Watch Status change
+const getWatchValue = (id) => {
+    getList.forEach((item)=>{
+        if(item.id == id){
+            item.watched = true;
+        }
+    });
+}
+
 
 // Add Movies to Watchlist
 const addMovieWatchlist = (id, type) => {
@@ -385,7 +394,7 @@ const appendWatchList = () => {
                         </div>
                     </div>
                     <div class="w-movie-btns">
-                        <select class="form-select" aria-label="Default select example">
+                        <select class="form-select" aria-label="Default select example" onChange=getWatchValue(${item.id})>
                             <option ${item.watched ? "" : "selected"}>Unwatched</option>
                             <option ${item.watched ? "selected" : ""}>Watched</option>
                         </select>
