@@ -275,7 +275,10 @@ let watchlistModal = document.querySelector(".watchlist-box");
 
 
 // Save watchlist to local storage 
-getList = localStorage.getItem("watchlist") ? JSON.parse(localStorage.getItem("watchlist")) : localStorage.setItem("watchlist", JSON.stringify(watchlist));
+if(!localStorage.getItem("watchlist")){
+    localStorage.setItem("watchlist", JSON.stringify(watchlist));
+}
+getList = JSON.parse(localStorage.getItem("watchlist"));
 
 
 // Watchlist Button Action
