@@ -52,7 +52,6 @@ const appendMovie = (movieData, search = false) => {
         moviesHolder.appendChild(colDiv);
     });
     pageNo++;
-
 }
 
 
@@ -83,6 +82,7 @@ document.addEventListener("click", (evt) => {
             let movieRlsDate = movieModal.querySelector(".rls-date");
             let movieGenre = movieModal.querySelector(".movie-genre");
             let movieStars = movieModal.querySelector(".movie-stars");
+            let modWatchlistBtn = movieModal.querySelector(".mod-watchlist-btn");
             movieGenre.innerHTML = "";
             movieStars.innerHTML = "";
             let imgUrl = movie.poster_path ? `http://image.tmdb.org/t/p/w500/${movie.poster_path}` : "";;
@@ -90,6 +90,21 @@ document.addEventListener("click", (evt) => {
             movieName.textContent = movie.title || movie.name;
             movieDesc.textContent = movie.overview;
             movieRlsDate.innerHTML = `<span class="rls-head">Release Date:</span> ${movie.release_date || movie.first_air_date}`;
+            modWatchlistBtn.setAttribute("onClick", `addMovieWatchlist(${movie.id}, "${movie.media_type}")`);
+            modWatchlistBtn.textContent = "Add to Watchlist";
+            modWatchlistBtn.style.backgroundColor = "#573184";
+
+            if (getList) {
+                getList.forEach((item) => {
+                    if (item.id == movie.id && item.deleted == false) {
+                        modWatchlistBtn.textContent = "Remove from Watchlist";
+                        modWatchlistBtn.setAttribute("onClick", `delMovie(${movie.id})`);
+                        modWatchlistBtn.style.backgroundColor = "rgb(227, 66, 30)";
+                    }
+                });
+            }
+
+
 
             let stars = Math.round(movie.vote_average * 5 / 10);
             for (let i = 0; i < stars; i++) {
@@ -111,10 +126,11 @@ document.addEventListener("click", (evt) => {
 
 
     // Close Modal
-    if (evt.target.parentElement == crossModal) {
+    if (evt.target.parentElement == crossModal || evt.target == overlay) {
         movieModal.style.display = "none";
         overlay.style.display = "none";
         document.body.classList.remove("overflow-hidden");
+        watchlistModal.style.display = "none";
     }
 
 });
@@ -220,71 +236,166 @@ window.onload = function () {
 
 
 // Watchlist
+
+// intial watchlist
 let watchlist = [
     {
         id: 868759,
         watched: false,
-        delete: false,
+        deleted: false,
         type: "movie"
     },
     {
         id: 804150,
-        watched: false,
-        delete: false,
+        watched: true,
+        deleted: false,
         type: "movie"
     },
     {
         id: 76331,
         watched: false,
-        delete: false,
+        deleted: false,
         type: "tv"
     }
 ];
+
+
+// Temprary Datas
 let getApiUrl;
 let findType;
+let delBtn;
+let getList;
 
+
+// DOM Elements
 let watchlistBtn = document.querySelector(".watchlist");
 let watchlistBox = document.querySelector(".movie-list .row");
-localStorage.setItem("watchlist", JSON.stringify(watchlist));
-let getList = JSON.parse(localStorage.getItem("watchlist"));
-
-watchlist.forEach((item) => {
-    if (item.type == "movie") {
-        findType = "movie";
-    } else {
-        findType = "tv";
-    }
-
-    let getApiUrl = `https://api.themoviedb.org/3/${findType}/${item.id}?api_key=${apiKey}&language=en-US`;
-
-    getApiData(undefined, getApiUrl).then((data) => {
-        let colDiv = document.createElement("div");
-        colDiv.setAttribute("class", "col-md-2");
-        watchlistBox.appendChild(colDiv);
-        colDiv.innerHTML = `
-            <div class="watch-movie">
-                <div class="w-movie-det">
-                    <div class="w-movie-img">
-                        <img src="http://image.tmdb.org/t/p/w500/${data.poster_path}" alt="">
-                    </div>
-                    <div class="w-movie-name">
-                        <div class="w-head">${data.title || data.name}</div>
-                    </div>
-                </div>
-                <div class="w-movie-btns">
-                    <select class="form-select" aria-label="Default select example">
-                        <option selected>Unwatched</option>
-                        <option value="1">Watched</option>
-                    </select>
-                    <div class="delete-btn">
-                        <i class="fa-solid fa-trash"></i>
-                    </div>
-                </div>
-            </div>
-        `;
+let watchlistModal = document.querySelector(".watchlist-box");
 
 
 
-    });
+// Save watchlist to local storage 
+getList = localStorage.getItem("watchlist") ? JSON.parse(localStorage.getItem("watchlist")) : localStorage.setItem("watchlist", JSON.stringify(watchlist));
+
+
+// Watchlist Button Action
+watchlistBtn.addEventListener("click", () => {
+
+    watchlistModal.style.display = "block";
+    overlay.style.display = "block";
+    document.body.classList.add("overflow-hidden");
+    crossModal = watchlistModal.querySelector(".cross");
+
+    appendWatchList();
 
 });
+
+
+// Delete Movie from Waatchlist
+const delMovie = (id) => {
+    let modWatchlistBtn = movieModal.querySelector(".mod-watchlist-btn");
+    getList.forEach((item) => {
+        if (item.id == id) {
+            item.deleted = true;
+            modWatchlistBtn.setAttribute("onClick", `addMovieWatchlist(${item.id}, "${item.type}")`);
+            modWatchlistBtn.textContent = "Add to Watchlist";
+            modWatchlistBtn.style.backgroundColor = "#573184";
+        }
+    });
+
+    localStorage.setItem("watchlist", JSON.stringify(getList));
+    appendWatchList();
+}
+
+
+// Add Movies to Watchlist
+const addMovieWatchlist = (id, type) => {
+
+    let alreadyThere = false;
+    let modWatchlistBtn = movieModal.querySelector(".mod-watchlist-btn");
+
+    getList.forEach((item) => {
+        if (item.id == id) {
+            item.deleted = false;
+            alreadyThere = true;
+            return;
+        }
+    });
+
+    if (!alreadyThere) {
+        if (type == "movie") {
+            findType = "movie";
+        } else {
+            findType = "tv";
+        }
+
+        if (id && type) {
+            let getApiUrl = `https://api.themoviedb.org/3/${findType}/${id}?api_key=${apiKey}&language=en-US`;
+
+            getApiData(undefined, getApiUrl).then((data) => {
+                let watchlistMovie = {
+                    id: data.id,
+                    watched: false,
+                    deleted: false,
+                    type: findType
+                }
+                getList = [...getList, watchlistMovie];
+            });
+        }
+    }
+    
+    
+    
+    localStorage.setItem("watchlist", JSON.stringify(getList));
+    modWatchlistBtn.textContent = "Remove from Watchlist";
+    modWatchlistBtn.setAttribute("onClick", `delMovie(${id})`);
+    modWatchlistBtn.style.backgroundColor = "rgb(227, 66, 30)";
+    
+}
+
+
+
+// Append Watchlist Movies
+const appendWatchList = () => {
+    watchlistBox.innerHTML = "Add Movies to Watchlist";
+
+    getList.forEach((item) => {
+        if (item.type == "movie") {
+            findType = "movie";
+        } else {
+            findType = "tv";
+        }
+        if (!item.deleted) {
+            let getApiUrl = `https://api.themoviedb.org/3/${findType}/${item.id}?api_key=${apiKey}&language=en-US`;
+
+            watchlistBox.innerHTML = "";
+
+            getApiData(undefined, getApiUrl).then((data) => {
+                let colDiv = document.createElement("div");
+                colDiv.setAttribute("class", "col-lg-2 col-md-3 col-sm-4 col-6");
+                watchlistBox.appendChild(colDiv);
+                colDiv.innerHTML = `
+                <div class="watch-movie">
+                <div class="w-movie-det">
+                <div class="w-movie-img">
+                            <img src="http://image.tmdb.org/t/p/w500/${data.poster_path}" alt="">
+                        </div>
+                        <div class="w-movie-name">
+                            <div class="w-head">${data.title || data.name}</div>
+                        </div>
+                    </div>
+                    <div class="w-movie-btns">
+                        <select class="form-select" aria-label="Default select example">
+                            <option ${item.watched ? "" : "selected"}>Unwatched</option>
+                            <option ${item.watched ? "selected" : ""}>Watched</option>
+                        </select>
+                        <div class="delete-btn" onClick=delMovie(${item.id})>
+                            <i class="fa-solid fa-trash"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+            });
+        }
+    });
+}
